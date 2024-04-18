@@ -34,3 +34,5 @@ Start PulseAudio:
 ## Random note and string generator
 
 run with `awk -f generate_random_notes_and_string.awk <<< ""`
+
+run continuously: `while true; do; awk -f generate_random_notes_and_string.awk <<< ""; sleep 2; done`

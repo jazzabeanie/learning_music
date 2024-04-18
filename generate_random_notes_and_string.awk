@@ -9,6 +9,7 @@ BEGIN{
   notes[7] = "G"
 }
 {
+  srand()
   string = int(rand() * 6) + 1
   note_index = int(rand() * 7) + 1
   print notes[note_index] " " string
