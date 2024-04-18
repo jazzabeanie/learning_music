@@ -30,3 +30,7 @@ Configure PulseAudio:
 Start PulseAudio:
 
     Run pulseaudio.exe from the command prompt or create a shortcut to make it easier to start in the future.
+
+## Random note and string generator
+
+run with `awk -f generate_random_notes_and_string.awk <<< ""`
