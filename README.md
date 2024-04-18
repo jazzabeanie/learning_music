@@ -1,6 +1,10 @@
 # Music tools
 
+This was done with awk just because that's what I've been learning lately.
+
 ## Random note generator
+
+This was made to randomise the exercises in this video: https://www.youtube.com/watch?v=PJddQ6Q0UDo
 
 To run `awk -f generate_random_notes.awk <<< 'A,B,C,D,E,F,G'`. The notes to randomise are provided in the string at the end.
 
@@ -33,6 +37,6 @@ Start PulseAudio:
 
 ## Random note and string generator
 
-run with `awk -f generate_random_notes_and_string.awk <<< ""`
+To generate an individual note and string: `awk -f generate_random_notes_and_string.awk <<< ""`
 
-run continuously: `while true; do; awk -f generate_random_notes_and_string.awk <<< ""; sleep 2; done`
+To run continuously: `while true; do; awk -f generate_random_notes_and_string.awk <<< ""; sleep 2; done`. Run this, find the note, then look up and find the latest note on the screen.

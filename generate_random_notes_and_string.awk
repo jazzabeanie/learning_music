@@ -11,6 +11,7 @@ BEGIN{
 {
   srand()
   string = int(rand() * 6) + 1
+  # string = int(rand() * 3) + 2 # strings between 2 and 4
   note_index = int(rand() * 7) + 1
   print notes[note_index] " " string
 }
