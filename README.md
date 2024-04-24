@@ -16,6 +16,12 @@ View them in a random order: `awk 'NR>1{print $0}' difficult_notes.csv | shuf`
 
 To run continuously: `while true; do; awk 'NR>1{print $0}' difficult_notes.csv | shuf | head -n 1; sleep 2; done`
 
+## Random note and string generator
+
+To generate an individual note and string: `awk -f generate_random_notes_and_string.awk <<< ""`
+
+To run continuously: `while true; do; awk -f generate_random_notes_and_string.awk <<< ""; sleep 2; clear; done`. Run this, find the note, then look up and find the latest note on the screen.
+
 ## Playing sounds
 
 install sox: `sudo apt install sox`
@@ -37,8 +43,3 @@ Start PulseAudio:
 
     Run pulseaudio.exe from the command prompt or create a shortcut to make it easier to start in the future.
 
-## Random note and string generator
-
-To generate an individual note and string: `awk -f generate_random_notes_and_string.awk <<< ""`
-
-To run continuously: `while true; do; awk -f generate_random_notes_and_string.awk <<< ""; sleep 2; done`. Run this, find the note, then look up and find the latest note on the screen.
