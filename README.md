@@ -4,6 +4,12 @@
 
 To run `awk -f generate_random_notes.awk <<< 'A,B,C,D,E,F,G'`. The notes to randomise are provided in the string at the end.
 
+## Hard note generator
+
+Difficult notes are saved in a csv file: `./difficult_notes.csv`.
+
+View them in a random order: `awk 'NR>1{print $0}' difficult_notes.csv | shuf`
+
 ## Playing sounds
 
 install sox: `sudo apt install sox`
