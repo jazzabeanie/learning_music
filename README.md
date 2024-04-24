@@ -8,11 +8,13 @@ This was made to randomise the exercises in this video: https://www.youtube.com/
 
 To run `awk -f generate_random_notes.awk <<< 'A,B,C,D,E,F,G'`. The notes to randomise are provided in the string at the end.
 
-## Hard note generator
+## Difficult note generator
 
 Difficult notes are saved in a csv file: `./difficult_notes.csv`.
 
 View them in a random order: `awk 'NR>1{print $0}' difficult_notes.csv | shuf`
+
+To run continuously: `while true; do; awk 'NR>1{print $0}' difficult_notes.csv | shuf | head -n 1; sleep 2; done`
 
 ## Playing sounds
 
