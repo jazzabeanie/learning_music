@@ -24,6 +24,12 @@ To run continuously: `while true; do; awk -f generate_random_notes_and_string.aw
 
 ## Playing sounds
 
+### Ubuntu:
+
+Play continuously with sound (note process must be killed to stop): `while true; do; awk -f generate_random_notes_and_string.awk <<< "" | tee >(xargs echo && echo "") | awk '{print "./notes/" tolower($1) ".wav" }' | xargs ffplay -autoexit -nodisp | sleep 3; clear; done`
+
+### WSL:
+
 install sox: `sudo apt install sox`
 
 if on WSL, install PulseAudio: `TODO`
