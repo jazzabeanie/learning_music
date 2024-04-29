@@ -5,7 +5,7 @@ play_random_notes() {
     while true; do
         # Generate a random note and string, speak it
         note_and_string=$(awk -f generate_random_notes_and_string.awk <<< "")
-        echo $note_and_string | xargs say
+        echo $note_and_string | sed 's/A/Ayee/g' | xargs say
 
         # Sleep for 1 second after saying the note
         sleep 1
