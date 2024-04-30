@@ -16,7 +16,7 @@ play_all_notes() {
     echo $note_and_string >> /tmp/notes.log
     echo "$note_and_string" | sed 's/A/Ayee/g' | xargs say
     sleep 1
-    echo ${note_and_string%%,*} | awk '{print "./notes/" tolower($1) ".wav"}' | xargs ffplay -autoexit -nodisp
+    echo ${note_and_string##*,} | awk '{print "./notes/" tolower($1) ".wav"}' | xargs ffplay -autoexit -nodisp
     sleep 1
     clear
   done
