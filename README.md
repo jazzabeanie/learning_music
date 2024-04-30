@@ -34,6 +34,10 @@ or say the note: `./play_random_note.sh`
 
 Previously say the note with: `while true; do; awk -f generate_random_notes_and_string.awk <<< "" | tee >(xargs say) | awk '{print "./notes/" tolower($1) ".wav" }' | xargs ffplay -autoexit -nodisp | sleep 3; clear; done`
 
+Play all notes in random order:
+
+`./play_all_notes.sh` or to play a specific list of notes: `./play_all_notes.sh difficult_guitar_notes.csv`
+
 ### WSL:
 
 install sox: `sudo apt install sox`
