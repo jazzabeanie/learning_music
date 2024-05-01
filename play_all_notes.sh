@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# TODO: change this to something like:
+# FILE=${1:-"./guitar_notes.csv"}
 if [ -z "$1" ]; then
   FILE="./guitar_notes.csv"
 else
