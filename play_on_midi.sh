@@ -38,6 +38,9 @@ index=0
 
 XTONE_PORT=$(aseqdump -l | grep XTONE | awk '{print $1}')
 
+clear
+echo "Press a button to play a note"
+
 # Start listening to MIDI device events
 aseqdump -p $XTONE_PORT | \
 while read press; do
@@ -54,7 +57,7 @@ while read press; do
           ((index++))
       else
           echo "No more lines to process."
-          say "Done"
-          break
+          say "finished all notes"
+          exit 0
       fi
 done
