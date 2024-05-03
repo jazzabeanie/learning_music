@@ -30,5 +30,31 @@ if [ ! -d "./notes" ]; then
     exit 1
 fi
 
-# Execute the function
-play_all_notes
+# Prepare the shuffled lines in advance
+mapfile -t lines < <(awk 'NR>1{print $0}' "$FILE" | shuf)
+
+# Counter to track which line to process next
+index=0
+
+XTONE_PORT=$(aseqdump -l | grep XTONE | awk '{print $1}')
+
+# Start listening to MIDI device events
+aseqdump -p $XTONE_PORT | \
+while read press; do
+      if [[ $index -lt ${#lines[@]} ]]; then
+          if [[ $press == *"Control change"* ]]; then
+              clear
+              echo "${lines[$index]}"
+              echo ""
+              note_and_string="${lines[$index]}"
+              echo "$note_and_string" | sed 's/A/Ayee/g' | xargs say
+              sleep 1
+              echo ${note_and_string##*,} | awk '{print "./notes/" tolower($1) ".wav"}' | xargs ffplay -autoexit -nodisp
+          fi
+          ((index++))
+      else
+          echo "No more lines to process."
+          say "Done"
+          break
+      fi
+done
