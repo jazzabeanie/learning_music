@@ -38,6 +38,8 @@ Play all notes in random order:
 
 `./play_all_notes.sh` or to play a specific list of notes: `./play_all_notes.sh difficult_guitar_notes.csv`
 
+To see the notes, open a new pane and run `tail -f /tmp/notes.log`
+
 ### WSL:
 
 install sox: `sudo apt install sox`

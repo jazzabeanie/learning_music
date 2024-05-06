@@ -58,6 +58,7 @@ while read press; do
       else
           echo "No more lines to process."
           say "finished all notes"
+          sleep 0.5
           exit 0
       fi
 done
