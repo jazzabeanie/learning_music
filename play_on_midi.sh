@@ -44,13 +44,21 @@ echo "Press a button to play a note"
 # Start listening to MIDI device events
 aseqdump -p $XTONE_PORT | \
 while read press; do
+      # TODO: save the amount of time elapsed since last press and the note to a file.
+      # I'm thinking it should be in the formate of note,string,time_seconds.
+      # if START_TIME not set:
       if [[ $index -lt ${#lines[@]} ]]; then
           if [[ $press == *"Control change"* ]]; then
               clear
+              if ! [[ -z $START_TIME ]]; then
+                TIME_ELAPSED=$(($(date +%s) - START_TIME))
+                echo "$note_and_string,$TIME_ELAPSED" >> ./time_taken_log.csv
+              fi
               echo "${lines[$index]}"
               echo ""
               note_and_string="${lines[$index]}"
               echo "$note_and_string" | sed 's/A/Ayee/g' | xargs say
+              START_TIME=$(date +%s)
               sleep 1
               echo ${note_and_string##*,} | awk '{print "./notes/" tolower($1) ".wav"}' | xargs ffplay -autoexit -nodisp
           fi

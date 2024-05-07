@@ -40,6 +40,12 @@ Play all notes in random order:
 
 To see the notes, open a new pane and run `tail -f /tmp/notes.log`
 
+If you have a midi footswitch, you can run `./play_on_midi.sh`. Note - you will need to edit the file with the name of your controller. `aseqdump -l` to see available controllers.
+
+This lets you press a midi key to trigger the next sound. It will also log the time it has taken for you to figure out the note and log it to `./time_taken_log.csv`. At some point I will build the ability to focus on your worst notes.
+
+Start with `awk 'BEGIN{FS=","; OFS=","}{print $3 "," $1 "," $2}' time_taken_log.csv | sort`
+
 ### WSL:
 
 install sox: `sudo apt install sox`
