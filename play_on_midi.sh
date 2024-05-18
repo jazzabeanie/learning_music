@@ -67,7 +67,7 @@ while read press; do
               echo "$note_and_string" | sed 's/A/Ayee/g' | xargs say
               START_TIME=$(date +%s)
               sleep 1
-              echo ${note_and_string##*,} | awk '{print "./notes/" tolower($1) ".wav"}' | xargs ffplay -autoexit -nodisp
+              echo ${note_and_string##*,} | awk '{print "./notes/" tolower($1) ".wav"}' | xargs ffplay -autoexit -nodisp -loglevel quiet
           fi
           ((index++))
       else
