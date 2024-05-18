@@ -1,5 +1,7 @@
 #!/bin/bash
 
+MIDI_CONTROLLER_NAME="XTONE"
+
 # TODO: change this to something like:
 FILE=${1:-"./guitar_notes.csv"}
 
@@ -12,7 +14,7 @@ play_all_notes() {
   awk 'NR>1{print $0}' $FILE | shuf | while IFS= read -r note_and_string; do
     echo $note_and_string >> /tmp/notes.log
     echo "$note_and_string" | sed 's/A/Ayee/g' | xargs say
-    sleep 1
+    # sleep 0.5
     echo ${note_and_string##*,} | awk '{print "./notes/" tolower($1) ".wav"}' | xargs ffplay -autoexit -nodisp
     sleep 1
     clear
@@ -30,23 +32,28 @@ if [ ! -d "./notes" ]; then
     exit 1
 fi
 
-# Prepare the shuffled lines in advance
-mapfile -t lines < <(awk 'NR>1{print $0}' "$FILE" | shuf)
+NUMBER_OF_NOTES=${2:-"20"}
+
+if [ $1 = "focused" ]; then
+  # prepare focused list
+  mapfile -t lines < <(tail --lines 175 time_taken_log.csv | awk 'BEGIN{FS=","; OFS=","}{print $3, $1, $2}' | sort -r | sed 's/..//' | uniq | head -n $NUMBER_OF_NOTES | shuf)
+else
+  # Prepare all notes in shuffled lines
+  mapfile -t lines < <(awk 'NR>1{print $0}' "$FILE" | shuf)
+fi
 
 # Counter to track which line to process next
 index=0
 
-XTONE_PORT=$(aseqdump -l | grep XTONE | awk '{print $1}')
+XTONE_PORT=$(aseqdump -l | grep "$MIDI_CONTROLLER_NAME" | awk '{print $1}')
 
 clear
 echo "Press a button to play a note"
+say "Press a button to play a note"
 
 # Start listening to MIDI device events
 aseqdump -p $XTONE_PORT | \
 while read press; do
-      # TODO: save the amount of time elapsed since last press and the note to a file.
-      # I'm thinking it should be in the formate of note,string,time_seconds.
-      # if START_TIME not set:
       if [[ $index -lt ${#lines[@]} ]]; then
           if [[ $press == *"Control change"* ]]; then
               clear
