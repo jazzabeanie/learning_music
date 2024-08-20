@@ -1,10 +1,14 @@
 #!/bin/bash
 
+# TODO: get the first parameter
+SLEEP_TIME=${1:-"1"}
+
 # Define a function named 'play_random_notes'
 play_random_notes() {
     while true; do
         # Generate a random note and string, speak it
         note_and_string=$(awk -f generate_random_notes_and_string.awk <<< "")
+        echo $note_and_string
         echo $note_and_string | sed 's/A/Ayee/g' | xargs say
 
         # Sleep for 1 second after saying the note
@@ -13,8 +17,8 @@ play_random_notes() {
         # Play the corresponding audio file
         echo $note_and_string | awk '{print "./notes/" tolower($1) ".wav"}' | xargs ffplay -autoexit -nodisp
 
-        # Sleep for 2 seconds after playing the note
-        sleep 1
+        # Sleep before playing the next note
+        sleep $SLEEP_TIME
 
         # Clear the screen for the next iteration
         clear

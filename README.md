@@ -26,6 +26,8 @@ To run continuously: `while true; do; awk -f generate_random_notes_and_string.aw
 
 `sudo apt-get install gnustep-gui-runtime`
 
+I think the note wav files came from one of the keyboards on Ableton.
+
 ### Ubuntu:
 
 Play continuously with sound (note process must be killed to stop): `while true; do; awk -f generate_random_notes_and_string.awk <<< "" | tee >(xargs echo && echo "") | awk '{print "./notes/" tolower($1) ".wav" }' | xargs ffplay -autoexit -nodisp | sleep 3; clear; done`
