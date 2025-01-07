@@ -41,7 +41,7 @@ fi
 
 NUMBER_OF_NOTES=${2:-"20"}
 
-if [ $1 = "focused" ]; then
+if [ $1 = "--focused" ]; then
   # prepare focused list
   mapfile -t lines < <(tail --lines 175 time_taken_log.csv | awk 'BEGIN{FS=","; OFS=","}{print $3, $1, $2}' | sort -r | sed 's/..//' | uniq | head -n $NUMBER_OF_NOTES | shuf)
 else

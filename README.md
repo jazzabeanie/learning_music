@@ -44,7 +44,7 @@ To see the notes, open a new pane and run `tail -f /tmp/notes.log`
 
 If you have a midi footswitch, you can run `./play_on_midi.sh`. Note - you will need to edit the file with the name of your controller. `aseqdump -l` to see available controllers.
 
-This lets you press a midi key to trigger the next sound. It will also log the time it has taken for you to figure out the note and log it to `./time_taken_log.csv`. To fucus on just the worst notes when you practice, run `./play_on_midi.sh focused`.
+This lets you press a midi key to trigger the next sound. It will also log the time it has taken for you to figure out the note and log it to `./time_taken_log.csv`. To fucus on just the worst notes when you practice, run `./play_on_midi.sh --focused`. Or add `--exclude PATTERN` to remove lines that match the patter. For example `./play_on_midi.sh --exclude 1` would skip notes on the 1st string.
 
 ### WSL:
 
