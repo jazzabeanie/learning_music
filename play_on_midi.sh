@@ -3,7 +3,14 @@
 MIDI_CONTROLLER_NAME="XTONE"
 
 # TODO: change this to something like:
-FILE=${1:-"./guitar_notes.csv"}
+FILE="./guitar_notes.csv"
+
+if [ "$1" = "--exclude" ]; then
+  STRING_TO_EXCLUDE=$2
+  echo "excluding $STRING_TO_EXCLUDE"
+  grep -v $STRING_TO_EXCLUDE $FILE > "/tmp/temp.csv"
+  FILE="/tmp/temp.csv"
+fi
 
 # use `tail -f /tmp/notes.log` to see the notes as they are being played
 echo "" > /tmp/notes.log
