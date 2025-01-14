@@ -5,12 +5,28 @@ MIDI_CONTROLLER_NAME="XTONE"
 # TODO: change this to something like:
 FILE="./guitar_notes.csv"
 
-if [ "$1" = "--exclude" ]; then
-  STRING_TO_EXCLUDE=$2
-  echo "excluding $STRING_TO_EXCLUDE"
-  grep -v $STRING_TO_EXCLUDE $FILE > "/tmp/temp.csv"
-  FILE="/tmp/temp.csv"
-fi
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --exclude)
+      STRING_TO_EXCLUDE=$2
+      echo "excluding $STRING_TO_EXCLUDE"
+      TEMP_FILE=$(mktemp /tmp/temp.XXXXXX.csv)
+      grep -v "$STRING_TO_EXCLUDE" "$FILE" > "$TEMP_FILE"
+      FILE="$TEMP_FILE"
+      echo "Contents of FILE:"
+      cat "$FILE"
+      shift 2
+      ;;
+    --focused)
+      FOCUSED=true
+      shift
+      ;;
+    *)
+      # Handle other arguments if needed
+      shift
+      ;;
+  esac
+done
 
 # use `tail -f /tmp/notes.log` to see the notes as they are being played
 echo "" > /tmp/notes.log
@@ -41,7 +57,7 @@ fi
 
 NUMBER_OF_NOTES=${2:-"20"}
 
-if [ $1 = "--focused" ]; then
+if [ "$FOCUSED" = true ]; then
   # prepare focused list
   mapfile -t lines < <(tail --lines 175 time_taken_log.csv | awk 'BEGIN{FS=","; OFS=","}{print $3, $1, $2}' | sort -r | sed 's/..//' | uniq | head -n $NUMBER_OF_NOTES | shuf)
 else
