@@ -1,10 +1,17 @@
 # Music tools
 
-This was done with awk just because that's what I've been learning lately.
+## How to use
+
+- Run, or play [the video](https://www.youtube.com/watch?v=O_uywf68d1E).
+- It will say the note and string number, find it on your guitar and play it
+- The note is played so you can check if you got it right
+- play with parameter or change video speed as required
 
 ## Random note generator
 
 This was made to randomise the exercises in this video: https://www.youtube.com/watch?v=PJddQ6Q0UDo
+
+This video will substitute for installing if you just want basic use: https://www.youtube.com/watch?v=O_uywf68d1E
 
 To run `awk -f generate_random_notes.awk <<< 'A,B,C,D,E,F,G'`. The notes to randomise are provided in the string at the end.
 
