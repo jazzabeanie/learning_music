@@ -1,23 +1,47 @@
 # Music tools
 
+## Getting started
+
+1. Clone this repo and `cd` into it. The note WAV files are already included in `./notes/`.
+2. Install the tools listed under Dependencies below.
+3. Run the practice wizard:
+
+   ```sh
+   ./practice.py
+   ```
+
+   Answer the prompts (Enter accepts the default shown in brackets) - see "practice.py — the app" below for what each question does.
+
+## Dependencies
+
+- **Python 3** - standard library only, no pip packages required.
+- **`say`** - text-to-speech command used to announce each note/chord. macOS ships this built in. On Linux there's no equivalent by default, so you'll need to provide your own `say` on the `PATH` (e.g. a small script wrapping `espeak-ng` or a local TTS engine such as Piper).
+- **`ffplay`** (from `ffmpeg`) - plays the note's WAV file so you can check yourself. Install with `sudo apt install ffmpeg` (Ubuntu/Debian) or `brew install ffmpeg` (macOS).
+- **`aseqdump`** (from `alsa-utils`) - only needed if you pick MIDI controller as the advance mode. Install with `sudo apt install alsa-utils`, then run `aseqdump -l` to list available controllers.
+
+The legacy shell scripts described further down have their own extra setup notes under "Playing sounds".
+
 ## practice.py — the app
 
-A single interactive app (Python 3, no dependencies) that replaces the `play_*.sh` scripts below. Run it and answer the prompts (Enter accepts the default shown in brackets):
+A single interactive app (Python 3 standard library; see Dependencies above for the external tools it shells out to) that replaces the `play_*.sh` scripts below. Run it and answer the prompts (Enter accepts the default shown in brackets):
 
 ```sh
 ./practice.py
 ```
 
+If you've run it before, it first shows a summary of your last session's settings and asks if you want to continue with them - answer yes to skip straight to practicing, or no to go through the questions below (saved to `last_session.json` for next time).
+
 It walks you through:
 
 - **Which strings** to practice (all, or e.g. `2,3,4`)
 - **Notes or chords** — chord qualities available: major, minor, diminished, augmented, major 7, minor 7, 7, diminished 7, augmented 7. Chords are prompted with a root string, e.g. "C minor 7, string 5".
+- **Starting finger** (chords only) — practice starting on particular fretting fingers: all, none (default), or a comma-separated list of `i` (index), `m` (middle), `r` (ring), `p` (pinky), e.g. `i,m`.
 - **Include sharps?** (default no)
 - **Practice mode** — endless random, one full pass through everything, or *focused* (your 20 slowest recent items from `time_taken_log.csv`)
 - **Advance mode** — automatically (default 1s between items), key press, or MIDI controller (default XTONE; `aseqdump -l` lists controllers)
 - **Announce-to-play delay** (default 0.5s)
 
-Each round announces the note/chord, waits, then plays the note WAV so you can check yourself (for chords it plays the root note — playing the full chord/arpeggio is a future TODO). In key press and MIDI modes your time-to-answer is logged to `time_taken_log.csv`, which feeds focused mode.
+Each round announces the note/chord (and starting finger, if chosen), waits, then plays the note WAV so you can check yourself (for chords it plays the root note — playing the full chord/arpeggio is a future TODO). In key press and MIDI modes your time-to-answer is logged to `time_taken_log.csv`, which feeds focused mode.
 
 To start focused mode from a blank slate (e.g. after changing instrument or making real progress), clear the time taken log — it asks for confirmation first:
 
