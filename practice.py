@@ -388,6 +388,7 @@ def wizard(csv_pool):
                     "Practice starting on particular fingers? "
                     "('all', 'none', or e.g. i,m for index,middle - i/m/r/p)",
                     list(FINGERS.keys()),
+                    default="none",
                 )
                 return [FINGERS[c] for c in finger_codes]
 
