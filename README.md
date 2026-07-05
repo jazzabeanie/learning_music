@@ -59,16 +59,18 @@ To practice a specific list instead of the generated pool:
 
 Watch prompts from another pane with `tail -f /tmp/notes.log`.
 
-The shell scripts below still work and will be removed once practice.py is proven.
+## Superseded tools
 
-## How to use
+Everything below predates `practice.py` and has been superseded by it. The shell/awk scripts still work and are kept for reference, but will be removed once `practice.py` is fully proven.
+
+### How to use
 
 - Run, or play [the video](https://www.youtube.com/watch?v=O_uywf68d1E).
 - It will say the note and string number, find it on your guitar and play it
 - The note is played so you can check if you got it right
 - play with parameter or change video speed as required
 
-## Random note generator
+### Random note generator
 
 This was made to randomise the exercises in this video: https://www.youtube.com/watch?v=PJddQ6Q0UDo
 
@@ -76,7 +78,7 @@ This video will substitute for installing if you just want basic use: https://ww
 
 To run `awk -f generate_random_notes.awk <<< 'A,B,C,D,E,F,G'`. The notes to randomise are provided in the string at the end.
 
-## Difficult note generator
+### Difficult note generator
 
 Difficult notes are saved in a csv file: `./difficult_notes.csv`.
 
@@ -84,19 +86,19 @@ View them in a random order: `awk 'NR>1{print $0}' difficult_notes.csv | shuf`
 
 To run continuously: `while true; do; awk 'NR>1{print $0}' difficult_notes.csv | shuf | head -n 1; sleep 2; done`
 
-## Random note and string generator
+### Random note and string generator
 
 To generate an individual note and string: `awk -f generate_random_notes_and_string.awk <<< ""`
 
 To run continuously: `while true; do; awk -f generate_random_notes_and_string.awk <<< ""; sleep 2; clear; done`. Run this, find the note, then look up and find the latest note on the screen.
 
-## Playing sounds
+### Playing sounds
 
 `sudo apt-get install gnustep-gui-runtime`
 
 I think the note wav files came from one of the keyboards on Ableton.
 
-### Ubuntu:
+#### Ubuntu:
 
 Play continuously with sound (note process must be killed to stop): `while true; do; awk -f generate_random_notes_and_string.awk <<< "" | tee >(xargs echo && echo "") | awk '{print "./notes/" tolower($1) ".wav" }' | xargs ffplay -autoexit -nodisp | sleep 3; clear; don e`
 
@@ -114,7 +116,7 @@ If you have a midi footswitch, you can run `./play_on_midi.sh`. Note - you will 
 
 This lets you press a midi key to trigger the next sound. It will also log the time it has taken for you to figure out the note and log it to `./time_taken_log.csv`. To fucus on just the worst notes when you practice, run `./play_on_midi.sh --focused`. Or add `--exclude PATTERN` to remove lines that match the patter. For example `./play_on_midi.sh --exclude 1` would skip notes on the 1st string.
 
-### WSL:
+#### WSL:
 
 install sox: `sudo apt install sox`
 
