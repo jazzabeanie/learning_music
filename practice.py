@@ -16,6 +16,7 @@ TODO: play the full chord / arpeggio instead of just the root note.
 """
 
 import argparse
+import json
 import os
 import random
 import shutil
@@ -28,6 +29,7 @@ import tty
 NOTES_DIR = "./notes"
 TIME_LOG = "./time_taken_log.csv"
 NOTES_LOG = "/tmp/notes.log"
+SESSION_FILE = "./last_session.json"
 
 NATURALS = ["A", "B", "C", "D", "E", "F", "G"]
 SHARPS = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"]
@@ -45,21 +47,32 @@ CHORD_QUALITIES = [
     "augmented 7",
 ]
 
+FINGERS = {"i": "index", "m": "middle", "r": "ring", "p": "pinky"}
+
 FOCUSED_LOG_LINES = 175  # how far back in the time log focused mode looks
 FOCUSED_POOL_SIZE = 20
+
+PRACTICE_MODES = [
+    "endless random",
+    "one full pass through everything",
+    f"focused (your {FOCUSED_POOL_SIZE} slowest recent items)",
+]
+ADVANCE_MODES = ["automatically", "key press", "MIDI controller"]
 
 
 class Item:
     """One thing to practice: a note or chord rooted on a given string."""
 
-    def __init__(self, string, root, quality=None):
+    def __init__(self, string, root, quality=None, finger=None):
         self.string = string
         self.root = root
         self.quality = quality  # None for plain notes
+        self.finger = finger  # None unless a starting finger was chosen
 
     @property
     def name(self):
-        return f"{self.root} {self.quality}" if self.quality else self.root
+        name = f"{self.root} {self.quality}" if self.quality else self.root
+        return f"{name} ({self.finger})" if self.finger else name
 
     @property
     def display(self):
@@ -70,6 +83,8 @@ class Item:
         # "A" is misread by say, and "#" should be spoken as "sharp"
         root = self.root.replace("A", "Ayee").replace("#", " sharp")
         name = f"{root} {self.quality}" if self.quality else root
+        if self.finger:
+            name = f"{name}, {self.finger}"
         return f"{name}, string {self.string}"
 
 
@@ -122,6 +137,54 @@ def ask_numbers(prompt, valid, default="all"):
         print(f"Enter 'all' or numbers from {valid}, e.g. 2,3,4")
 
 
+def ask_codes(prompt, valid_codes, default="all"):
+    """Accepts 'all', 'none', or a comma-separated list of codes like 'i,m'."""
+    while True:
+        answer = ask(prompt, default).lower()
+        if answer == "all":
+            return list(valid_codes)
+        if answer == "none":
+            return []
+        picked = [c for c in answer.replace(" ", "").split(",") if c]
+        if picked and all(c in valid_codes for c in picked):
+            return sorted(set(picked), key=valid_codes.index)
+        print(f"Enter 'all', 'none', or codes from {valid_codes}, e.g. i,m")
+
+
+def load_session():
+    if not os.path.isfile(SESSION_FILE):
+        return None
+    try:
+        with open(SESSION_FILE) as f:
+            return json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
+def save_session(settings):
+    with open(SESSION_FILE, "w") as f:
+        json.dump(settings, f, indent=2)
+
+
+def describe_session(s):
+    lines = [
+        f"  Strings: {','.join(str(n) for n in s['strings'])}",
+        f"  Type: {'chords' if s['chords'] else 'notes'}",
+    ]
+    if s["chords"]:
+        lines.append(f"  Qualities: {', '.join(s['qualities'])}")
+        lines.append(f"  Starting fingers: {', '.join(s['fingers']) or 'none'}")
+    lines.append(f"  Sharps: {'yes' if s['sharps'] else 'no'}")
+    lines.append(f"  Practice mode: {PRACTICE_MODES[s['mode']]}")
+    lines.append(f"  Advance: {ADVANCE_MODES[s['advance']]}")
+    if s["advance"] == 0:
+        lines.append(f"  Auto interval: {s['auto_interval']}s")
+    elif s["advance"] == 2:
+        lines.append(f"  MIDI controller: {s['controller']}")
+    lines.append(f"  Announce delay: {s['announce_delay']}s")
+    return "\n".join(lines)
+
+
 # ---------------------------------------------------------------------------
 # Sound
 
@@ -141,8 +204,16 @@ def play_root(root):
 # ---------------------------------------------------------------------------
 # Pools
 
-def build_pool(strings, chords, qualities, roots):
+def build_pool(strings, chords, qualities, roots, fingers=None):
     if chords:
+        if fingers:
+            return [
+                Item(s, r, q, f)
+                for s in strings
+                for r in roots
+                for q in qualities
+                for f in fingers
+            ]
         return [Item(s, r, q) for s in strings for r in roots for q in qualities]
     return [Item(s, r) for s in strings for r in roots]
 
@@ -279,34 +350,56 @@ def practice(items, endless, waiter, auto_interval, announce_delay, log_times):
 def wizard(csv_pool):
     print("Guitar practice setup (Enter accepts the default)\n")
 
+    saved = load_session() if csv_pool is None else None
+    continuing = False
+    if saved is not None:
+        print("Last session:")
+        print(describe_session(saved))
+        continuing = ask_yes_no("Continue with these settings?", default_yes=True)
+        print()
+
+    def pick(key, asker):
+        return saved[key] if continuing else asker()
+
     if csv_pool is not None:
         pool = csv_pool
         strings = ALL_STRINGS
     else:
-        strings = ask_numbers(
+        strings = pick("strings", lambda: ask_numbers(
             "Which strings do you want to practice? ('all' or e.g. 2,3,4)",
             ALL_STRINGS,
+        ))
+        chords = pick(
+            "chords",
+            lambda: ask_choice("Practice notes or chords?", ["notes", "chords"]) == 1,
         )
-        chords = ask_choice("Practice notes or chords?", ["notes", "chords"]) == 1
         qualities = []
+        fingers = []
         if chords:
-            print("Which chord qualities? ('all' or e.g. 1,3,5)")
-            for i, q in enumerate(CHORD_QUALITIES, 1):
-                print(f"  {i}. {q}")
-            picks = ask_numbers("Choose", list(range(1, len(CHORD_QUALITIES) + 1)))
-            qualities = [CHORD_QUALITIES[i - 1] for i in picks]
-        sharps = ask_yes_no("Include sharps?", default_yes=False)
-        roots = SHARPS if sharps else NATURALS
-        pool = build_pool(strings, chords, qualities, roots)
+            def ask_qualities():
+                print("Which chord qualities? ('all' or e.g. 1,3,5)")
+                for i, q in enumerate(CHORD_QUALITIES, 1):
+                    print(f"  {i}. {q}")
+                picks = ask_numbers("Choose", list(range(1, len(CHORD_QUALITIES) + 1)))
+                return [CHORD_QUALITIES[i - 1] for i in picks]
 
-    mode = ask_choice(
-        "Practice mode?",
-        [
-            "endless random",
-            "one full pass through everything",
-            f"focused (your {FOCUSED_POOL_SIZE} slowest recent items)",
-        ],
-        default_index=2,
+            def ask_fingers():
+                finger_codes = ask_codes(
+                    "Practice starting on particular fingers? "
+                    "('all', 'none', or e.g. i,m for index,middle - i/m/r/p)",
+                    list(FINGERS.keys()),
+                )
+                return [FINGERS[c] for c in finger_codes]
+
+            qualities = pick("qualities", ask_qualities)
+            fingers = pick("fingers", ask_fingers)
+        sharps = pick("sharps", lambda: ask_yes_no("Include sharps?", default_yes=False))
+        roots = SHARPS if sharps else NATURALS
+        pool = build_pool(strings, chords, qualities, roots, fingers)
+
+    mode = pick(
+        "mode",
+        lambda: ask_choice("Practice mode?", PRACTICE_MODES, default_index=2),
     )
     if mode == 2:
         focused = focused_pool(strings)
@@ -316,25 +409,45 @@ def wizard(csv_pool):
             print("Not enough history in the time log yet - using the full pool.")
     endless = mode == 0
 
-    advance = ask_choice(
-        "How do you want to advance to the next one?",
-        ["automatically", "key press", "MIDI controller"],
-        default_index=2,
+    advance = pick(
+        "advance",
+        lambda: ask_choice(
+            "How do you want to advance to the next one?", ADVANCE_MODES, default_index=2
+        ),
     )
     waiter = None
     auto_interval = 1.0
+    controller = None
     if advance == 0:
-        auto_interval = ask_float("Seconds before the next one", 1)
+        auto_interval = pick("auto_interval", lambda: ask_float("Seconds before the next one", 1))
     elif advance == 2:
-        controller = ask("MIDI controller name", "XTONE")
+        controller = pick("controller", lambda: ask("MIDI controller name", "XTONE"))
         waiter = midi_waiter(controller)
     else:
         waiter = wait_key
 
-    announce_delay = ask_float("Delay between announcing and playing the note", 0.5)
+    announce_delay = pick(
+        "announce_delay",
+        lambda: ask_float("Delay between announcing and playing the note", 0.5),
+    )
 
     # Time-to-answer is only meaningful when you control the pace
     log_times = waiter is not None
+
+    if csv_pool is None:
+        save_session({
+            "strings": strings,
+            "chords": chords,
+            "qualities": qualities,
+            "fingers": fingers,
+            "sharps": sharps,
+            "mode": mode,
+            "advance": advance,
+            "controller": controller,
+            "auto_interval": auto_interval,
+            "announce_delay": announce_delay,
+        })
+
     return pool, endless, waiter, auto_interval, announce_delay, log_times
 
 
