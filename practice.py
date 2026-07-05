@@ -306,6 +306,7 @@ def wizard(csv_pool):
             "one full pass through everything",
             f"focused (your {FOCUSED_POOL_SIZE} slowest recent items)",
         ],
+        default_index=2,
     )
     if mode == 2:
         focused = focused_pool(strings)
@@ -318,6 +319,7 @@ def wizard(csv_pool):
     advance = ask_choice(
         "How do you want to advance to the next one?",
         ["automatically", "key press", "MIDI controller"],
+        default_index=2,
     )
     waiter = None
     auto_interval = 1.0
