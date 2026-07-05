@@ -82,10 +82,14 @@ class Item:
     def spoken(self):
         # "A" is misread by say, and "#" should be spoken as "sharp"
         root = self.root.replace("A", "Ayee").replace("#", " sharp")
-        name = f"{root} {self.quality}" if self.quality else root
+        parts = []
         if self.finger:
-            name = f"{name}, {self.finger}"
-        return f"{name}, string {self.string}"
+            parts.append(self.finger)
+        parts.append(f"string {self.string}")
+        parts.append(root)
+        if self.quality:
+            parts.append(self.quality)
+        return ", ".join(parts)
 
 
 # ---------------------------------------------------------------------------
