@@ -1,18 +1,52 @@
 #!/bin/bash
 
 # TODO: get the first parameter
-SLEEP_TIME=$1
+SLEEP_TIME=""
+declare -a EXCLUDED_STRINGS
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --exclude)
+      EXCLUDED_STRINGS+=("$2")
+      echo "excluding $2"
+      shift 2
+      ;;
+    *)
+      if [ -z "$SLEEP_TIME" ]; then
+        SLEEP_TIME=$1
+      fi
+      shift
+      ;;
+  esac
+done
 
 if [ -z "$SLEEP_TIME" ]; then
     echo "Pass a number as the first argument to specify the sleep time between notes. or pass --key to wait for a key press between notes."
     exit
 fi
 
+# Define a function to check if a string should be excluded
+should_exclude() {
+    local string=$1
+    for excluded in "${EXCLUDED_STRINGS[@]}"; do
+        if grep -q "$excluded" <<< "$string"; then
+            return 0
+        fi
+    done
+    return 1
+}
+
 # Define a function named 'play_random_notes'
 play_random_notes() {
     while true; do
         # Generate a random note and string, speak it
         note_and_string=$(awk -f generate_random_notes_and_string.awk <<< "")
+
+        # Skip if this note's string is excluded
+        if should_exclude "$note_and_string"; then
+            continue
+        fi
+
         echo "$note_and_string"
         echo "$note_and_string" | sed 's/A/Ayee/g' | xargs say
 

@@ -21,6 +21,10 @@ while [ $# -gt 0 ]; do
       FOCUSED=true
       shift
       ;;
+    --midi-controller)
+      MIDI_CONTROLLER_NAME=$2
+      shift 2
+      ;;
     *)
       # Handle other arguments if needed
       shift

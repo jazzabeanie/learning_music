@@ -1,5 +1,42 @@
 # Music tools
 
+## practice.py — the app
+
+A single interactive app (Python 3, no dependencies) that replaces the `play_*.sh` scripts below. Run it and answer the prompts (Enter accepts the default shown in brackets):
+
+```sh
+./practice.py
+```
+
+It walks you through:
+
+- **Which strings** to practice (all, or e.g. `2,3,4`)
+- **Notes or chords** — chord qualities available: major, minor, diminished, augmented, major 7, minor 7, 7, diminished 7, augmented 7. Chords are prompted with a root string, e.g. "C minor 7, string 5".
+- **Include sharps?** (default no)
+- **Practice mode** — endless random, one full pass through everything, or *focused* (your 20 slowest recent items from `time_taken_log.csv`)
+- **Advance mode** — automatically (default 1s between items), key press, or MIDI controller (default XTONE; `aseqdump -l` lists controllers)
+- **Announce-to-play delay** (default 0.5s)
+
+Each round announces the note/chord, waits, then plays the note WAV so you can check yourself (for chords it plays the root note — playing the full chord/arpeggio is a future TODO). In key press and MIDI modes your time-to-answer is logged to `time_taken_log.csv`, which feeds focused mode.
+
+To start focused mode from a blank slate (e.g. after changing instrument or making real progress), clear the time taken log — it asks for confirmation first:
+
+```sh
+./practice.py --clear-log
+```
+
+See `./practice.py --help` for details on how the time taken log works.
+
+To practice a specific list instead of the generated pool:
+
+```sh
+./practice.py difficult_guitar_notes.csv
+```
+
+Watch prompts from another pane with `tail -f /tmp/notes.log`.
+
+The shell scripts below still work and will be removed once practice.py is proven.
+
 ## How to use
 
 - Run, or play [the video](https://www.youtube.com/watch?v=O_uywf68d1E).
